@@ -13,7 +13,11 @@ def main():
     parser.add_argument('--h', '--output-hdf5', help='path to output hdf5 file')
 
     args = parser.parse_args()
-    h5Convertor.dicomToH5(args.i.split("/")[-1],  readFilesInDir(args.i), args.h)
+
+    if(args.h.split(".")[-1] != "hdf5"):
+        args.h += ".hdf5"
+
+    h5Convertor.dicomToH5(readFilesInDir(args.i), args.h)
 
 if __name__ == '__main__':
     main()

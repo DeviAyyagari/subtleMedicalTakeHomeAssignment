@@ -14,7 +14,12 @@ def main():
     parser.add_argument('--o', '--output-dicom', help='path to output DICOM directory')
 
     args = parser.parse_args()
-    h5Convertor.h5ToDicom(readFilesInDir(args.i), args.h, args.o)
+
+    if(args.h.split(".")[-1] != "hdf5"):
+        args.h += ".hdf5"
+
+    if(h5Convertor.h5ToDicom(readFilesInDir(args.i), args.h, args.o) < 0):
+        print("HDF5 File does not have pixel data in expected format. Expected a dataset with name="+h5h5Convertor.H5_DATASET_NAME)
 
 if __name__ == '__main__':
     main()
