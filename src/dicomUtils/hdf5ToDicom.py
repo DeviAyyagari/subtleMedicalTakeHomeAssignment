@@ -1,11 +1,5 @@
 import argparse
 import h5Convertor
-from os import listdir, walk
-from os.path import isdir, isfile, join
-
-def readFilesInDir(dirPath):
-    return sorted((directoryPath+"/"+f for directoryPath,dirName,files in walk(dirPath) for f in files if isfile(join(dirPath, f))))
-
 
 def main():
     parser = argparse.ArgumentParser(description='Covert dicom files to hdf5 format')
@@ -18,7 +12,7 @@ def main():
     if(args.h.split(".")[-1] != "hdf5"):
         args.h += ".hdf5"
 
-    if(not h5Convertor.h5ToDicom(readFilesInDir(args.i), args.h, args.o)):
+    if(not h5Convertor.h5ToDicom(args.i, args.h, args.o)):
         print("HDF5 File does not have pixel data in expected format. Expected a dataset with name="+h5Convertor.H5_DATASET_NAME)
 
 if __name__ == '__main__':
