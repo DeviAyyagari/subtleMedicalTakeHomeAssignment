@@ -1,13 +1,17 @@
 import argparse
 import h5Convertor
+import os
 
 def main():
-    parser = argparse.ArgumentParser(description='Covert dicom files to hdf5 format')
+    parser = argparse.ArgumentParser(description='Covert hdf4 files to dicom format')
     parser.add_argument('--i', '--input-dicom', help='path to input DICOM directory')
     parser.add_argument('--h', '--input-hdf5', help='path to input hdf5 file')
-    parser.add_argument('--o', '--output-dicom', help='path to output DICOM directory')
+    parser.add_argument('--o', '--output-dicom', help='path to output DICOM directory. If the path does not exist, specified path is created')
 
     args = parser.parse_args()
+
+    if(not os.path.exists(args.o)):
+        os.mkdirs(args.o)
 
     if(args.h.split(".")[-1] != "hdf5"):
         args.h += ".hdf5"
