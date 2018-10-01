@@ -10,7 +10,9 @@ def loadData(xDicomPath, gtDicomPath):
     return xTrain, gtTrain
 
 def preProcessData(xData, gtData):
-    for index in range(len(xData)):
+    for index in range(xData.shape[0]):
+        #xData[index] = xData[index].reshape((512,512,1,252))
+        #gtData[index] = gtData[index].reshape((512,512,1,252))
         xData[index] = (xData[index] - 127.5) / 127.5
         gtData[index] = (gtData[index] - 127.5) / 127.5
 

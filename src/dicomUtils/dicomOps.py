@@ -1,6 +1,7 @@
 import os
 import re
 from . import h5Convertor
+import numpy as np
 
 def allDicomOps(inputDir, op, **payload):
     """
@@ -51,8 +52,8 @@ def allDicomTo3DVolumes(inputDir):
     """
     Return: a dict with key=<case_i> and values=3DVolume of all dcm files under <***_dcm>
     """
-    volumes3D = allDicomOps(inputDir, h5Convertor.dicomTo3DVolume)
-    volumes = list()
-    for case in sorted(volumes3D.keys()):
-        volumes.append(volume3D[case])
+    volumes3D = allDicomOps(inputDir, h5Convertor.dicomTo3DVolumeReshaped)
+    volumes = np.zeros((len(volumes3D),) + volumes3D[list(volumes3D.keys())[0]].shape)
+    for i,case in enumerate(sorted(volumes3D.keys())):
+        volumes[i,:,:,:,:] = volumes3D[case]
     return volumes

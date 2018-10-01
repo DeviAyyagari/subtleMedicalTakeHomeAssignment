@@ -3,7 +3,10 @@ from keras.applications.vgg16 import VGG16
 from keras.models import Model
 import numpy as np
 
-imageShape = (512, 512, 252)
+imageShape = (512, 512, 1, 252)
+
+def l1Loss(y_true, y_pred):
+    return K.mean(K.abs(y_pred - y_true))
 
 def perceptualLoss(yTrue, yPred):
     vgg = VGG16(include_top = False, weights = 'imagenet', input_shape = imageShape)

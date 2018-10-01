@@ -15,7 +15,7 @@ def readFilesInDir(dirPath):
 
 def dicomTo3DVolume(dicomInputPath, **kwargs):
     """
-    Take a dicomInputPath to one Dicom image set and return a 3DVolume 
+    Take a dicomInputPath to one Dicom image set and return a 3DVolume
     **kwargs are to support this function as an allDicomOps op
     """
     files = readFilesInDir(dicomInputPath)
@@ -35,6 +35,31 @@ def dicomTo3DVolume(dicomInputPath, **kwargs):
     for file in files:
         dataset = pydicom.dcmread(file)
         dicomArray[:,:,sliceLocationIndeces[dataset.SliceLocation]] = dataset.pixel_array/np.linalg.norm(dataset.pixel_array)
+
+    return dicomArray
+
+def dicomTo3DVolumeReshaped(dicomInputPath, **kwargs):
+    """
+    Take a dicomInputPath to one Dicom image set and return a 3DVolume
+    **kwargs are to support this function as an allDicomOps op
+    """
+    files = readFilesInDir(dicomInputPath)
+    refDs = pydicom.dcmread(files[0])
+    dicomArray = np.zeros((int(refDs.Rows), int(refDs.Columns), 1, len(files)), dtype=np.float32)
+
+    sliceLocations = []
+    for file in files:
+        dataset = pydicom.dcmread(file)
+        sliceLocations.append(dataset.SliceLocation)
+    sliceLocations.sort()
+    sliceLocationIndeces = {}
+    for i,sliceLoc in enumerate(sliceLocations):
+        sliceLocationIndeces[sliceLoc] = i
+    del sliceLocations[:]
+
+    for file in files:
+        dataset = pydicom.dcmread(file)
+        dicomArray[:,:,:,sliceLocationIndeces[dataset.SliceLocation]] = (dataset.pixel_array/np.linalg.norm(dataset.pixel_array)).reshape((int(refDs.Rows), int(refDs.Columns), 1))
 
     return dicomArray
 

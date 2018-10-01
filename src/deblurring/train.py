@@ -1,5 +1,5 @@
 import os
-from . import model, loss, utils
+import model, loss, utils
 import argparse
 import numpy as np
 from keras.optimizers import Adam
@@ -9,11 +9,11 @@ def saveWeights(discriminator, generator, epoch, loss):
     saveDir = "model/"
     if not os.path.exists(saveDir):
         os.makedirs(saveDir)
-    g.save_weights(os.path.join(saveDir, 'generator_{}_{}.h5'.format(epoch, loss)), True)
-    d.save_weights(os.path.join(saveDir, 'discriminator_{}.h5'.format(epoch)), True)
+    generator.save_weights(os.path.join(saveDir, 'generator.h5'), True)
+    discriminator.save_weights(os.path.join(saveDir, 'discriminator.h5'), True)
 
-def learn(xTrain, gtTrain, batchSize = 3, epochs = 100, discriminatorUpdates = 5):
-
+def learn(xTrain, gtTrain, batchSize = 3, epochs = 250, discriminatorUpdates = 5):
+    print("Start learning on training set.")
     generator = model.generatorModel()
     discriminator = model.discriminatorModel()
     discOnGen = model.generatorContainingDiscriminator(generator, discriminator)
@@ -24,22 +24,22 @@ def learn(xTrain, gtTrain, batchSize = 3, epochs = 100, discriminatorUpdates = 5
     discriminator.trainable = True
     discriminator.compile(optimizer = discOptimizer, loss = loss.wassersteinLoss)
     discriminator.trainable = False
-    loss = [loss.perceptualLoss, loss.wassersteinLoss]
+    lossModel = [loss.l1Loss, loss.wassersteinLoss]
     loss_weights = [100, 1]
-    discOnGen.compile(optimizer = discOnGenOptimizer, loss = loss, loss_weights = loss_weights)
+    discOnGen.compile(optimizer = discOnGenOptimizer, loss = lossModel, loss_weights = loss_weights)
     discriminator.trainable = True
 
     outputTrueBatch, outputFalseBatch = np.ones((batchSize, 1)), -np.ones((batchSize, 1))
 
     for epoch in range(epochs):
         print('epoch: {}/{}'.format(epoch, epochs))
-        print('batches: {}'.format(len(xTrain) / batchSize))
+        print('batches: {}'.format(xTrain.shape[0] / batchSize))
 
-        permutatedIndexes = np.random.permutation(len(xTrain))
+        permutatedIndexes = np.random.permutation(xTrain.shape[0])
 
         discLosses = []
         discOnGenLosses = []
-        for index in range(len(xTrain) // batchSize):
+        for index in range(xTrain.shape[0] // batchSize):
             batchIndeces = permutatedIndexes[index*batchSize:(index+1)*batchSize]
             xTrainBatch = xTrain[batchIndeces]
             gtTrainBatch = gtTrain[batchIndeces]
@@ -49,15 +49,15 @@ def learn(xTrain, gtTrain, batchSize = 3, epochs = 100, discriminatorUpdates = 5
             for _ in range(discriminatorUpdates):
                 lossReal = discriminator.train_on_batch(gtTrainBatch, outputTrueBatch)
                 lossFake = discriminator.train_on_batch(fakeImages, outputFalseBatch)
-                loss = 0.5 * np.add(lossReal, lossFake)
-                discLosses.append(loss)
+                discLoss = 0.5 * np.add(lossReal, lossFake)
+                discLosses.append(discLoss)
             print('batch {} discriminator loss : {}'.format(index+1, np.mean(discLosses)))
 
             discriminator.trainable = False
 
-            loss = discOnGen.train_on_batch(xTrainBatch, [gtTrainBatch, outputTrueBatch])
-            discOnGenLosses.append(loss)
-            print('batch {} disc on gen loss : {}'.format(index+1, loss))
+            disOnGenLoss = discOnGen.train_on_batch(xTrainBatch, [gtTrainBatch, outputTrueBatch])
+            discOnGenLosses.append(disOnGenLoss)
+            print('batch {} disc on gen loss : {}'.format(index+1, disOnGenLoss))
 
             discriminator.trainable = True
 
@@ -76,8 +76,11 @@ def main():
         print("Some input path does not exist")
         exit(1)
 
+    print("Start loading training data...")
     xTrain, gtTrain = utils.loadData(args.xTrain_dicom_dir, args.gtTrain_dicom_dir)
+    print("Finished loading data.")
     xTrain, gtTrain = utils.preProcessData(xTrain, gtTrain)
+    print("Finished preprocessing data.")
     learn(xTrain, gtTrain)
 
 if __name__ == '__main__':
