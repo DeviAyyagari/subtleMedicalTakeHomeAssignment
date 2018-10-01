@@ -7,10 +7,17 @@ from os.path import isdir, isfile, join
 H5_DATASET_NAME = "3DVolume"
 
 def readFilesInDir(dirPath):
+    """
+    Return files in the given directory
+    """
     return sorted((directoryPath+"/"+f for directoryPath,dirName,files in walk(dirPath) for f in files if isfile(join(dirPath, f))))
 
 
-def dicomTo3DVolume(dicomInputPath):
+def dicomTo3DVolume(dicomInputPath, **kwargs):
+    """
+    Take a dicomInputPath to one Dicom image set and return a 3DVolume 
+    **kwargs are to support this function as an allDicomOps op
+    """
     files = readFilesInDir(dicomInputPath)
     refDs = pydicom.dcmread(files[0])
     dicomArray = np.zeros((int(refDs.Rows), int(refDs.Columns), len(files)), dtype=np.float32)

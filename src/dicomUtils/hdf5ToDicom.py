@@ -11,7 +11,7 @@ def main():
     args = parser.parse_args()
 
     if(not os.path.exists(args.o)):
-        os.mkdirs(args.o)
+        os.makedirs(args.o)
 
     if(args.h.split(".")[-1] != "hdf5"):
         args.h += ".hdf5"
