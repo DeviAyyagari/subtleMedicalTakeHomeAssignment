@@ -16,3 +16,6 @@ def perceptualLoss(yTrue, yPred):
 
 def wassersteinLoss(yTrue, yPred):
     return K.mean(yTrue * yPred)
+
+def l1Error(yTrue, yPred):
+    return np.linalg.norm(yTrue-yPred)
