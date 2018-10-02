@@ -1,5 +1,5 @@
 #############################################################
-# Main script that runs the whole project as an entity
+# Simulates fast data acquisition by creating Blurred images
 # Takes as input the train and test data paths.
 # Expects train and test data paths to have original sharp images under
 #    - train
@@ -18,9 +18,7 @@ import argparse
 import os
 import sys
 
-sys.path.append("../../src")
-from filters import guassianBlurFilter
-from deblurring import orchestrator
+import guassianBlurFilter
 
 def main():
     parser = argparse.ArgumentParser(description='Simulate Fast Data Acquisition and Improve image resolution with Deep learning')
@@ -72,13 +70,6 @@ def main():
     print("Creating TEST Blurred images from sharp images...")
     guassianBlurFilter.makeFilteredDataset(gtTestPath, xTestPath, sigma)
     print("Created TEST Blurred images from sharp images.")
-
-    #Step 3. Call deblurr orchestrator
-    print("Calling Deblur Orchestrator...")
-
-    orchestrator.orchestrate(xTrainPath, gtTrainPath, xTestPath, gtTestPath)
-
-    print("Deblurr Orchestrator finished.")
 
 if __name__ == '__main__':
     main()
